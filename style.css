@@ -10,6 +10,7 @@ header {
     color: white;
     height: 100px;
     padding: 10px;
+    display: flex;
   }
 
 footer {
@@ -28,5 +29,4 @@ footer {
 .headname {
     color: rgb(255, 238, 0);
     margin-right: 100px;
-    display: flex;
 }
