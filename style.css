@@ -28,4 +28,5 @@ footer {
 .headname {
     color: rgb(255, 238, 0);
     display: flex;
+    float: left;
 }
