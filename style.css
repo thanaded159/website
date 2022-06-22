@@ -28,5 +28,6 @@ footer {
 .headname {
     color: rgb(255, 238, 0);
     z-index: -1;
-    margin-left: 200px;
+    margin-left: 100px;
+    display: float;
 }
