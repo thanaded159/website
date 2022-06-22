@@ -8,7 +8,7 @@ body {
 header {
     background-color: black;
     color: white;
-    height: 70px;
+    height: 100px;
     padding: 10px;
   }
 
@@ -28,5 +28,5 @@ footer {
 .headname {
     color: rgb(255, 238, 0);
     margin-left: 100px;
-    display: float;
+    display: block;
 }
