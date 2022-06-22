@@ -27,6 +27,6 @@ footer {
 
 .headname {
     color: rgb(255, 238, 0);
-    margin-left: 100px;
-    display: block;
+    margin-right: 100px;
+    display: flex;
 }
