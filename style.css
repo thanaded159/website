@@ -25,6 +25,11 @@ footer {
       margin: 0 auto;
     }
 
-.headname {
+.headname1 {
     color: rgb(255, 238, 0);
+    font-size: 30px;
+}
+
+.headname2 {
+  color: rgb(255, 255, 255);
 }
