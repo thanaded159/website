@@ -44,3 +44,8 @@ footer {
   border: 1px solid #ccc;
   height: 300px;
 }
+
+.top10{
+  background-color: white;
+  padding: 10px;
+}
