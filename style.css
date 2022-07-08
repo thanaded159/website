@@ -63,7 +63,7 @@ footer {
 .topmenu ul{
   list-style: disc;
   margin: auto;
-  display: flex;
+  display: right;
   justify-content: left;
 }
 
