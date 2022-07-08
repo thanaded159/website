@@ -64,9 +64,10 @@ footer {
   list-style: disc;
   margin: auto;
   display: flex;
+  justify-content: left;
 }
 
 .topmenu li{
-  float: right;
+  float: left;
   padding: 10px 40px;
 }
