@@ -60,12 +60,6 @@ footer {
   height: 40px;
 }
 
-.topmenu ul{
-  list-style: disc;
-  margin: auto;
-  display: flex;
-}
-
 .topmenu li{
   float: left;
   padding: 10px 40px;
