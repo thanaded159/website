@@ -20,6 +20,11 @@ footer {
     text-align: center;
 }
 
+a {
+color: black;
+text-decoration: none;
+}
+
 .mainpage {
       width: 1024px; 
       margin: 0 auto;
@@ -70,4 +75,9 @@ footer {
 .topmenu li{
   float: right;
   padding: 10px 40px;
+}
+
+.link10 {
+  background-color: white;
+  padding: 10px;
 }
