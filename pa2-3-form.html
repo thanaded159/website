@@ -364,7 +364,7 @@ function bindInfo(){
   const fySel = document.getElementById('i_fiscalYear');
   const currentBE = new Date().getFullYear() + 543;
   fySel.innerHTML = "";
-  for(let y = currentBE - 3; y <= currentBE + 2; y++){
+  for(let y = currentBE - 3; y <= currentBE + 5; y++){
     const opt = document.createElement('option');
     opt.value = y;
     opt.textContent = `ปีงบประมาณ ${y} (${fiscalYearDisplay(y)})`;
