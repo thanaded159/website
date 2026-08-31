@@ -104,8 +104,14 @@ table.sum th{background:#eef2f7}
       <div><label>สถานศึกษา</label><input id="i_school" type="text"></div>
       <div><label>สังกัด</label><input id="i_affil" type="text"></div>
       <div><label>อันดับ/รับเงินเดือน</label><input id="i_salary" type="text" placeholder="เช่น คศ.2 อัตรา xxxxx บาท"></div>
-      <div><label>รอบการประเมิน ตั้งแต่</label><input id="i_start" type="date"></div>
-      <div><label>ถึงวันที่</label><input id="i_end" type="date"></div>
+      <div>
+        <label>รอบการประเมิน (ปีงบประมาณ)</label>
+        <select id="i_fiscalYear"></select>
+      </div>
+      <div>
+        <label>แสดงผลรอบการประเมิน</label>
+        <input id="i_fiscalDisplay" type="text" readonly style="background:#f4f6f9;font-weight:600">
+      </div>
       <div><label>ผู้บังคับบัญชา/ผู้อำนวยการ (รับทราบ)</label><input id="i_director" type="text"></div>
     </div>
     <label style="margin-top:12px">ภาระงาน</label>
@@ -179,6 +185,25 @@ const LEVEL_TITLE = {
   cs5:"ครูเชี่ยวชาญพิเศษ (คศ.5)"
 };
 const NEEDS_ACADEMIC = ["cs4","cs5"]; // วิทยฐานะที่ต้องยื่นผลงานทางวิชาการเพิ่มเติม
+
+/* ===================== ปีงบประมาณ ===================== */
+const THAI_MONTHS_ABBR = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+
+// beYear = ปีงบประมาณ (พ.ศ.) เช่น 2569 หมายถึง 1 ต.ค. 2568 - 30 ก.ย. 2569
+function fiscalYearRange(beYear){
+  const startBE = beYear - 1;
+  const endBE = beYear;
+  return {
+    startText: `1 ${THAI_MONTHS_ABBR[9]} ${startBE}`,   // 1 ต.ค.
+    endText:   `30 ${THAI_MONTHS_ABBR[8]} ${endBE}`,    // 30 ก.ย.
+    startISO: `${startBE-543}-10-01`,
+    endISO:   `${endBE-543}-09-30`
+  };
+}
+function fiscalYearDisplay(beYear){
+  const r = fiscalYearRange(beYear);
+  return `${r.startText} - ${r.endText}`;
+}
 
 /* ===================== ชื่อตัวชี้วัด (คงที่ทุกวิทยฐานะ) ===================== */
 const IND_STRUCT = {
@@ -302,9 +327,10 @@ function defaultData(){
   });
   const part2items = {};
   PART2_ITEMS.forEach(it=> part2items[it.key] = 0);
+  const currentBE = new Date().getFullYear() + 543;
   return {
     info:{name:"",position:"ครู",level:"none",school:"",affil:"",salary:"",
-      start:"",end:"",director:"",workload:""},
+      fiscalYear: currentBE, director:"",workload:""},
     part1,
     part2:{topic:"",problem:"",levels:part2items}
   };
@@ -327,12 +353,31 @@ function saveData(manual){
 /* ===================== ข้อมูลทั่วไป ===================== */
 function bindInfo(){
   const map = {i_name:'name',i_position:'position',i_school:'school',i_affil:'affil',
-    i_salary:'salary',i_start:'start',i_end:'end',i_director:'director'};
+    i_salary:'salary',i_director:'director'};
   Object.entries(map).forEach(([id,key])=>{
     const el = document.getElementById(id);
     el.value = data.info[key] || "";
     el.addEventListener('input', ()=>{ data.info[key]=el.value; saveData(); });
   });
+
+  // ===== ปีงบประมาณ =====
+  const fySel = document.getElementById('i_fiscalYear');
+  const currentBE = new Date().getFullYear() + 543;
+  fySel.innerHTML = "";
+  for(let y = currentBE - 3; y <= currentBE + 2; y++){
+    const opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = `ปีงบประมาณ ${y} (${fiscalYearDisplay(y)})`;
+    fySel.appendChild(opt);
+  }
+  fySel.value = data.info.fiscalYear || currentBE;
+  document.getElementById('i_fiscalDisplay').value = fiscalYearDisplay(fySel.value);
+  fySel.addEventListener('change', ()=>{
+    data.info.fiscalYear = +fySel.value;
+    document.getElementById('i_fiscalDisplay').value = fiscalYearDisplay(fySel.value);
+    saveData();
+  });
+
   const lvSel = document.getElementById('i_level');
   lvSel.value = data.info.level || "none";
   lvSel.addEventListener('change', ()=>{ data.info.level = lvSel.value; saveData(); renderPart1(); updateAcademicNote(); });
@@ -459,6 +504,7 @@ function renderSummary(){
     <div class="summary-item"><div class="num">${r.total.toFixed(1)}/100</div>รวม</div>`;
   document.getElementById('summaryTableWrap').innerHTML = `
     <p class="small">วิทยฐานะที่ขอ: <b>${LEVEL_TITLE[lvKey]}</b> — ระดับการปฏิบัติที่คาดหวัง: <b>${LEVEL_EXPECT[lvKey]}</b></p>
+    <p class="small">รอบการประเมิน (ปีงบประมาณ ${data.info.fiscalYear||''}): <b>${fiscalYearDisplay(data.info.fiscalYear || (new Date().getFullYear()+543))}</b></p>
     <table class="sum"><thead><tr><th>การประเมินข้อตกลงในการพัฒนางาน</th><th>คะแนนเต็ม</th><th>คะแนนประเมินตนเอง</th><th>เกณฑ์ผ่าน (ร้อยละ 70)</th><th>ผล</th></tr></thead>
     <tbody>
       <tr><td>ส่วนที่ 1 ข้อตกลงตามมาตรฐานตำแหน่ง</td><td>60</td><td>${r.p1}</td><td>≥ ${r.need1}</td>
@@ -519,6 +565,7 @@ function printForm(type){
   const inf = data.info;
   const lvKey = inf.level || 'none';
   const levelTitle = LEVEL_TITLE[lvKey];
+  const fyDisplay = fiscalYearDisplay(inf.fiscalYear || (new Date().getFullYear()+543));
   let html = "";
 
   if(type==='pa2'){
@@ -527,6 +574,7 @@ function printForm(type){
       <p>ชื่อ-สกุล: ${inf.name} &nbsp; ตำแหน่ง: ${inf.position} &nbsp; วิทยฐานะที่ขอ: ${levelTitle}</p>
       <p>ระดับการปฏิบัติที่คาดหวัง: <b>${LEVEL_EXPECT[lvKey]}</b></p>
       <p>สถานศึกษา: ${inf.school} &nbsp; สังกัด: ${inf.affil} &nbsp; อันดับเงินเดือน: ${inf.salary||'-'}</p>
+      <p>รอบการประเมิน (ปีงบประมาณ ${inf.fiscalYear||''}): <b>${fyDisplay}</b></p>
       <p>ภาระงาน: ${inf.workload==='yes'?'เป็นไปตามที่ ก.ค.ศ. กำหนด':(inf.workload==='no'?'ไม่เป็นไปตามที่ ก.ค.ศ. กำหนด':'ยังไม่ระบุ')}</p>
       ${r.needsAcademic? `<p style="color:#c97a1c"><b>หมายเหตุ:</b> วิทยฐานะนี้ต้องยื่นผลงานทางวิชาการเพิ่มเติมตามเกณฑ์ ก.ค.ศ.</p>`:''}
     </div>`;
@@ -563,7 +611,7 @@ function printForm(type){
     html += `<h2 style="text-align:center">แบบสรุปผลการประเมินการพัฒนางานตามข้อตกลง (PA3/ส)</h2>
     <p>ชื่อ-สกุล: ${inf.name} &nbsp; ตำแหน่ง: ${inf.position} &nbsp; วิทยฐานะที่ขอ: ${levelTitle}</p>
     <p>ระดับการปฏิบัติที่คาดหวัง: <b>${LEVEL_EXPECT[lvKey]}</b></p>
-    <p>สถานศึกษา: ${inf.school} &nbsp; สังกัด: ${inf.affil} &nbsp; รอบประเมิน: ${inf.start} ถึง ${inf.end}</p>`;
+    <p>สถานศึกษา: ${inf.school} &nbsp; สังกัด: ${inf.affil} &nbsp; รอบการประเมิน (ปีงบประมาณ ${inf.fiscalYear||''}): <b>${fyDisplay}</b></p>`;
     html += document.getElementById('summaryTableWrap').innerHTML;
     html += `<p style="font-size:16px;margin-top:10px"><b>สรุปผล:</b> ${r.finalPass?'ผ่านเกณฑ์การประเมิน':'ไม่ผ่านเกณฑ์การประเมิน'}</p>
     <br><p>ลงชื่อ..............................................ผู้ประเมินตนเอง<br>(${inf.name||''})</p>
