@@ -611,7 +611,8 @@ function printForm(type){
     html += `<h2 style="text-align:center">แบบสรุปผลการประเมินการพัฒนางานตามข้อตกลง (PA3/ส)</h2>
     <p>ชื่อ-สกุล: ${inf.name} &nbsp; ตำแหน่ง: ${inf.position} &nbsp; วิทยฐานะที่ขอ: ${levelTitle}</p>
     <p>ระดับการปฏิบัติที่คาดหวัง: <b>${LEVEL_EXPECT[lvKey]}</b></p>
-    <p>สถานศึกษา: ${inf.school} &nbsp; สังกัด: ${inf.affil} &nbsp; รอบการประเมิน (ปีงบประมาณ ${inf.fiscalYear||''}): <b>${fyDisplay}</b></p>`;
+    <p>สถานศึกษา: ${inf.school}</p>
+    <p>สังกัด: ${inf.affil}</p>`;
     html += document.getElementById('summaryTableWrap').innerHTML;
     html += `<p style="font-size:16px;margin-top:10px"><b>สรุปผล:</b> ${r.finalPass?'ผ่านเกณฑ์การประเมิน':'ไม่ผ่านเกณฑ์การประเมิน'}</p>
     <br><p>ลงชื่อ..............................................ผู้ประเมินตนเอง<br>(${inf.name||''})</p>
