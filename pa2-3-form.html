@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ระบบประเมินตนเอง PA2/ส - PA3/ส (ตามแบบ ก.ค.ศ.)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap');
+*{box-sizing:border-box;font-family:'Sarabun',sans-serif}
+body{margin:0;background:#f2f4f7;color:#222}
+header{background:#1e3a5f;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+header h1{font-size:16px;margin:0}
+nav{display:flex;background:#fff;border-bottom:2px solid #1e3a5f;flex-wrap:wrap}
+nav button{flex:1;min-width:110px;padding:11px;border:none;background:#eef2f7;cursor:pointer;font-size:13.5px;font-weight:600;color:#444}
+nav button.active{background:#1e3a5f;color:#fff}
+main{max-width:1120px;margin:16px auto;padding:0 12px 90px}
+.card{background:#fff;border-radius:10px;padding:18px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card h2{margin-top:0;color:#1e3a5f;font-size:17px;border-bottom:2px solid #eef2f7;padding-bottom:8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:13px;font-weight:600;color:#555;margin-bottom:4px}
+input[type=text],input[type=date],input[type=number],textarea,select{
+  width:100%;padding:8px;border:1px solid #ccd3da;border-radius:6px;font-size:14px}
+textarea{resize:vertical;min-height:55px}
+.small{font-size:12px;color:#777}
+.dsec{font-weight:700;background:#1e3a5f;color:#fff;padding:8px 10px;border-radius:6px;margin:14px 0 8px}
+.indicator{border:1px solid #e1e5ea;border-radius:8px;padding:12px;margin-bottom:10px}
+.idxname{font-weight:600;margin-bottom:4px;display:flex;justify-content:space-between;gap:8px}
+.idxdesc{font-size:12.5px;color:#666;margin-bottom:8px;line-height:1.5}
+.levels{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.level-opt{border:2px solid #dfe4ea;border-radius:8px;padding:8px;cursor:pointer;font-size:12px;text-align:center;transition:.15s}
+.level-opt.sel{border-color:#1e3a5f;background:#eaf1fb}
+.level-opt b{display:block;font-size:13px;margin-bottom:3px}
+.level-opt.l1.sel{border-color:#c0392b;background:#fdecea}
+.level-opt.l2.sel{border-color:#c97a1c;background:#fdf3e5}
+.level-opt.l3.sel{border-color:#1e6fbf;background:#e8f1fc}
+.level-opt.l4.sel{border-color:#1f8a4c;background:#e9f8ee}
+.score-badge{background:#1e3a5f;color:#fff;border-radius:14px;padding:2px 10px;font-size:12px;white-space:nowrap}
+table.sum{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px}
+table.sum th,table.sum td{border:1px solid #d5dae1;padding:6px 8px}
+table.sum th{background:#eef2f7}
+.summary-box{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.summary-item{flex:1;min-width:150px;background:#f6f8fb;border-radius:8px;padding:12px;text-align:center}
+.summary-item .num{font-size:24px;font-weight:700;color:#1e3a5f}
+.pass{color:#1f8a4c;font-weight:700}
+.fail{color:#c0392b;font-weight:700}
+.radio-row{display:flex;gap:18px;font-size:14px;margin-top:6px}
+.radio-row label{display:flex;align-items:center;gap:5px;font-weight:400;margin:0}
+.actions{position:sticky;bottom:0;background:#fff;border-top:1px solid #ddd;padding:10px 20px;
+  display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.btn{padding:9px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600}
+.btn-primary{background:#1e3a5f;color:#fff}
+.btn-green{background:#1f8a4c;color:#fff}
+.btn-orange{background:#c97a1c;color:#fff}
+.btn-grey{background:#607080;color:#fff}
+#fileInput{display:none}
+
+/* ===== พิมพ์: A4 แนวตั้ง + ตัดหน้าใหม่ ===== */
+#printArea{display:none}
+@page{
+  size: A4 portrait;
+  margin: 15mm 12mm;
+}
+@media print{
+  body *{visibility:hidden}
+  #printArea, #printArea *{visibility:visible}
+  #printArea{display:block;position:absolute;top:0;left:0;width:100%;padding:0}
+  #printArea table{width:100%;border-collapse:collapse;font-size:13px}
+  #printArea th,#printArea td{border:1px solid #000;padding:5px}
+  #printArea h2{font-size:16px}
+  #printArea h3{font-size:14px}
+  .noprint{display:none!important}
+  .page-break{page-break-before: always;}
+  .avoid-break{page-break-inside: avoid;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ระบบประเมินตนเอง PA2/ส และสรุปผล PA3/ส (อ้างอิงแบบฟอร์ม ก.ค.ศ.)</h1>
+  <span id="saveStatus" class="small" style="color:#cfe3ff"></span>
+</header>
+
+<nav class="noprint">
+  <button data-tab="info" class="active">ข้อมูลทั่วไป</button>
+  <button data-tab="part1">ส่วนที่ 1</button>
+  <button data-tab="part2">ส่วนที่ 2</button>
+  <button data-tab="summary">สรุปผล PA3</button>
+</nav>
+
+<main>
+  <!-- TAB: ข้อมูลทั่วไป -->
+  <section id="tab-info" class="card">
+    <h2>ข้อมูลผู้ประเมินตนเอง</h2>
+    <div class="grid">
+      <div><label>ชื่อ-สกุล</label><input id="i_name" type="text"></div>
+      <div><label>ตำแหน่ง</label><input id="i_position" type="text" value="ครู"></div>
+      <div><label>วิทยฐานะที่ขอรับการประเมิน</label>
+        <select id="i_level">
+          <option value="none">ไม่มีวิทยฐานะ (ระดับที่คาดหวัง: ปรับประยุกต์)</option>
+          <option value="cs2">ครูชำนาญการ (คศ.2) (ระดับที่คาดหวัง: แก้ไขปัญหา)</option>
+          <option value="cs3">ครูชำนาญการพิเศษ (คศ.3) (ระดับที่คาดหวัง: ริเริ่ม/แบบอย่างที่ดี)</option>
+        </select>
+      </div>
+      <div><label>สถานศึกษา</label><input id="i_school" type="text"></div>
+      <div><label>สังกัด</label><input id="i_affil" type="text"></div>
+      <div><label>อันดับ/รับเงินเดือน</label><input id="i_salary" type="text" placeholder="เช่น คศ.2 อัตรา xxxxx บาท"></div>
+      <div><label>รอบการประเมิน ตั้งแต่</label><input id="i_start" type="date"></div>
+      <div><label>ถึงวันที่</label><input id="i_end" type="date"></div>
+      <div><label>ผู้บังคับบัญชา/ผู้อำนวยการ (รับทราบ)</label><input id="i_director" type="text"></div>
+    </div>
+    <label style="margin-top:12px">ภาระงาน</label>
+    <div class="radio-row">
+      <label><input type="radio" name="workload" id="wl_yes" value="yes"> เป็นไปตามที่ ก.ค.ศ. กำหนด</label>
+      <label><input type="radio" name="workload" id="wl_no" value="no"> ไม่เป็นไปตามที่ ก.ค.ศ. กำหนด</label>
+    </div>
+    <p class="small" id="workloadWarn" style="color:#c0392b;display:none">* หากภาระงานไม่เป็นไปตามที่ ก.ค.ศ. กำหนด จะไม่สามารถผ่านเกณฑ์การประเมินได้ ไม่ว่าคะแนนส่วนอื่นจะเป็นเท่าใด</p>
+  </section>
+
+  <!-- TAB: ส่วนที่ 1 -->
+  <section id="tab-part1" class="card" style="display:none">
+    <h2>ส่วนที่ 1 ข้อตกลงในการพัฒนางานตามมาตรฐานตำแหน่ง (60 คะแนน)</h2>
+    <p class="small">ประเมินตนเองโดยเทียบกับระดับการปฏิบัติที่คาดหวัง 4 ระดับ ในแต่ละตัวชี้วัด (15 ตัวชี้วัด × 4 คะแนน)</p>
+    <div id="part1Wrap"></div>
+  </section>
+
+  <!-- TAB: ส่วนที่ 2 -->
+  <section id="tab-part2" class="card" style="display:none">
+    <h2>ส่วนที่ 2 ข้อตกลงในการพัฒนางานที่เสนอเป็นประเด็นท้าทายฯ (40 คะแนน)</h2>
+    <label>ชื่อประเด็นท้าทาย</label><textarea id="p2_topic"></textarea>
+    <label>สภาพปัญหาของผู้เรียนและการจัดการเรียนรู้</label><textarea id="p2_problem"></textarea>
+    <div id="part2Wrap" style="margin-top:14px"></div>
+  </section>
+
+  <!-- TAB: สรุปผล -->
+  <section id="tab-summary" class="card" style="display:none">
+    <h2>แบบสรุปผลการประเมินการพัฒนางานตามข้อตกลง (PA3/ส)</h2>
+    <div class="summary-box" id="summaryCards"></div>
+    <div id="summaryTableWrap"></div>
+    <div id="resultText" style="margin-top:14px;font-size:16px"></div>
+  </section>
+</main>
+
+<div class="actions noprint">
+  <button class="btn btn-primary" onclick="saveData(true)">💾 บันทึก</button>
+  <button class="btn btn-green" onclick="printForm('pa2')">🖨️ พิมพ์ PA2/ส</button>
+  <button class="btn btn-green" onclick="printForm('pa3')">🖨️ พิมพ์ PA3/ส</button>
+  <button class="btn btn-orange" onclick="exportJSON()">⬇️ ส่งออกไฟล์สำรอง</button>
+  <button class="btn btn-grey" onclick="document.getElementById('fileInput').click()">⬆️ นำเข้าไฟล์</button>
+  <input type="file" id="fileInput" accept=".json" onchange="importJSON(event)">
+</div>
+
+<div id="printArea"></div>
+
+<script>
+/* ===================== ระดับคุณภาพมาตรฐาน ===================== */
+const LEVELS = [
+  {lv:1,label:"ปฏิบัติได้ต่ำกว่าระดับฯ ที่คาดหวังมาก"},
+  {lv:2,label:"ปฏิบัติได้ต่ำกว่าระดับฯ ที่คาดหวัง"},
+  {lv:3,label:"ปฏิบัติได้ตามระดับฯ ที่คาดหวัง"},
+  {lv:4,label:"ปฏิบัติได้สูงกว่าระดับฯ ที่คาดหวัง"}
+];
+
+/* ===================== ชื่อตัวชี้วัด ===================== */
+const IND_STRUCT = {
+  d1:{title:"ด้านที่ 1 การจัดการเรียนรู้", keys:["1.1 สร้างและหรือพัฒนาหลักสูตร","1.2 ออกแบบการจัดการเรียนรู้","1.3 จัดกิจกรรมการเรียนรู้",
+    "1.4 สร้างและหรือพัฒนาสื่อ นวัตกรรม เทคโนโลยีและแหล่งเรียนรู้","1.5 วัดและประเมินผลการเรียนรู้",
+    "1.6 ศึกษา วิเคราะห์ และสังเคราะห์ เพื่อแก้ปัญหาหรือพัฒนาการเรียนรู้","1.7 จัดบรรยากาศที่ส่งเสริมและพัฒนาผู้เรียน",
+    "1.8 อบรมและพัฒนาคุณลักษณะที่ดีของผู้เรียน"]},
+  d2:{title:"ด้านที่ 2 การส่งเสริมและสนับสนุนการจัดการเรียนรู้", keys:["2.1 จัดทำข้อมูลสารสนเทศของผู้เรียนและรายวิชา",
+    "2.2 ดำเนินการตามระบบดูแลช่วยเหลือผู้เรียน","2.3 ปฏิบัติงานวิชาการ และงานอื่นๆ ของสถานศึกษา",
+    "2.4 ประสานความร่วมมือกับผู้ปกครอง ภาคีเครือข่าย และหรือสถานประกอบการ"]},
+  d3:{title:"ด้านที่ 3 การพัฒนาตนเองและวิชาชีพ", keys:["3.1 พัฒนาตนเองอย่างเป็นระบบและต่อเนื่อง",
+    "3.2 มีส่วนร่วมและเป็นผู้นำในการแลกเปลี่ยนเรียนรู้ทางวิชาชีพ",
+    "3.3 นำความรู้ ความสามารถ ทักษะที่ได้จากการพัฒนาตนเองและวิชาชีพมาใช้"]}
+};
+
+/* ===================== คำอธิบายลักษณะงานตามวิทยฐานะที่ขอ ===================== */
+const IND_DESC = {
+none:{d1:[
+ "จัดทำรายวิชาและหน่วยการเรียนรู้ให้สอดคล้องกับมาตรฐานการเรียนรู้ ตัวชี้วัด หรือผลการเรียนรู้ตามหลักสูตร โดยปรับประยุกต์ให้สอดคล้องกับบริบทของสถานศึกษา ผู้เรียน และท้องถิ่น",
+ "ออกแบบการจัดการเรียนรู้ที่เน้นผู้เรียนเป็นสำคัญ โดยปรับประยุกต์ให้สอดคล้องกับบริบทของสถานศึกษา ผู้เรียน และท้องถิ่น",
+ "อำนวยความสะดวกในการเรียนรู้และส่งเสริมให้ผู้เรียนพัฒนาเต็มตามศักยภาพ โดยปรับประยุกต์ให้สอดคล้องกับความแตกต่างของผู้เรียน",
+ "สร้างและพัฒนาสื่อ นวัตกรรม เทคโนโลยี และแหล่งเรียนรู้ให้สอดคล้องกับกิจกรรมการเรียนรู้ โดยปรับประยุกต์ให้สอดคล้องกับความแตกต่างของผู้เรียน",
+ "วัดและประเมินผลด้วยวิธีการที่หลากหลาย เหมาะสม และสอดคล้องกับมาตรฐานการเรียนรู้",
+ "ศึกษา วิเคราะห์ และสังเคราะห์ เพื่อแก้ปัญหาหรือพัฒนาการเรียนรู้ที่ส่งผลต่อคุณภาพผู้เรียน",
+ "จัดบรรยากาศที่ส่งเสริมและพัฒนาผู้เรียนให้เกิดกระบวนการคิด ทักษะชีวิต ทักษะการทำงาน ทักษะการเรียนรู้และนวัตกรรม",
+ "อบรมบ่มนิสัยให้ผู้เรียนมีคุณธรรม จริยธรรม คุณลักษณะอันพึงประสงค์ และค่านิยมความเป็นไทยที่ดีงาม"],
+ d2:["จัดทำข้อมูลสารสนเทศของผู้เรียนและรายวิชาเพื่อใช้ในการส่งเสริมสนับสนุนการเรียนรู้และพัฒนาคุณภาพผู้เรียน",
+ "ใช้ข้อมูลสารสนเทศเกี่ยวกับผู้เรียนรายบุคคล และประสานความร่วมมือกับผู้มีส่วนเกี่ยวข้องเพื่อพัฒนาและแก้ปัญหาผู้เรียน",
+ "ร่วมปฏิบัติงานทางวิชาการและงานอื่น ๆ ของสถานศึกษาเพื่อยกระดับคุณภาพการจัดการศึกษาของสถานศึกษา",
+ "ประสานความร่วมมือกับผู้ปกครอง ภาคีเครือข่าย และหรือสถานประกอบการ เพื่อร่วมกันพัฒนาผู้เรียน"],
+ d3:["พัฒนาตนเองอย่างเป็นระบบและต่อเนื่อง เพื่อให้มีความรู้ความสามารถและทักษะ โดยเฉพาะภาษาไทย ภาษาอังกฤษ เทคโนโลยีดิจิทัล และสมรรถนะวิชาชีพครู",
+ "มีส่วนร่วมในการแลกเปลี่ยนเรียนรู้ทางวิชาชีพ เพื่อพัฒนาการจัดการเรียนรู้",
+ "นำความรู้ ความสามารถ ทักษะที่ได้จากการพัฒนาตนเองและวิชาชีพมาใช้ในการพัฒนาการจัดการเรียนรู้และคุณภาพผู้เรียน"]},
+cs2:{d1:[
+ "จัดทำรายวิชาและหน่วยการเรียนรู้ให้สอดคล้องกับมาตรฐานการเรียนรู้และตัวชี้วัด โดยพัฒนาให้สอดคล้องกับบริบทสถานศึกษา ผู้เรียน ท้องถิ่น และสามารถแก้ไขปัญหาในการจัดการเรียนรู้ได้",
+ "ออกแบบการจัดการเรียนรู้ที่เน้นผู้เรียนเป็นสำคัญ สามารถแก้ไขปัญหาในการจัดการเรียนรู้ ทำให้ผู้เรียนคิดและค้นพบองค์ความรู้ด้วยตนเอง สร้างแรงบันดาลใจ",
+ "อำนวยความสะดวกและส่งเสริมให้ผู้เรียนพัฒนาเต็มศักยภาพ โดยจัดกิจกรรมที่แก้ไขปัญหาในการจัดการเรียนรู้ ทำให้ผู้เรียนคิดและค้นพบองค์ความรู้ด้วยตนเอง",
+ "สร้างและพัฒนาสื่อ นวัตกรรม เทคโนโลยี และแหล่งเรียนรู้ เพื่อแก้ไขปัญหาในการเรียนรู้ ทำให้ผู้เรียนมีทักษะการคิดและสร้างนวัตกรรมได้",
+ "ใช้วิธีการที่หลากหลาย เหมาะสม ประเมินตามสภาพจริง และนำผลมาใช้แก้ไขปัญหาการจัดการเรียนรู้",
+ "ศึกษา วิเคราะห์ และสังเคราะห์เพื่อแก้ไขปัญหาหรือพัฒนาการเรียนรู้ที่ส่งผลต่อคุณภาพผู้เรียน และนำผลมาใช้แก้ไขปัญหา",
+ "จัดบรรยากาศที่เหมาะสมสอดคล้องกับความแตกต่างของผู้เรียนรายบุคคล สามารถแก้ไขปัญหาการเรียนรู้ สร้างแรงบันดาลใจ",
+ "อบรมบ่มนิสัยให้ผู้เรียนมีคุณธรรม จริยธรรม โดยคำนึงถึงความแตกต่างรายบุคคล และสามารถแก้ไขปัญหาผู้เรียนได้"],
+ d2:["จัดทำข้อมูลสารสนเทศให้เป็นปัจจุบัน เพื่อใช้ส่งเสริมสนับสนุนการเรียนรู้ แก้ไขปัญหา และพัฒนาคุณภาพผู้เรียน",
+ "ใช้ข้อมูลสารสนเทศรายบุคคล และประสานความร่วมมือกับผู้มีส่วนเกี่ยวข้องเพื่อพัฒนาและแก้ไขปัญหาผู้เรียน",
+ "ร่วมปฏิบัติงานทางวิชาการและงานอื่นๆ เพื่อยกระดับคุณภาพการจัดการศึกษา",
+ "ประสานความร่วมมือเพื่อร่วมกันแก้ไขปัญหาและพัฒนาผู้เรียน"],
+ d3:["พัฒนาตนเองอย่างเป็นระบบและต่อเนื่อง และนำผลมาใช้ในการจัดการเรียนรู้ที่มีผลต่อคุณภาพผู้เรียน",
+ "มีส่วนร่วมในการแลกเปลี่ยนเรียนรู้ทางวิชาชีพ เพื่อแก้ไขปัญหาและพัฒนาการจัดการเรียนรู้",
+ "นำความรู้ ความสามารถ ทักษะที่ได้จากการพัฒนาตนเองมาใช้พัฒนาการจัดการเรียนรู้ คุณภาพผู้เรียน และนวัตกรรม"]},
+cs3:{d1:[
+ "ริเริ่ม พัฒนารายวิชาและหน่วยการเรียนรู้ให้สอดคล้องกับมาตรฐาน บริบทสถานศึกษา ผู้เรียน ท้องถิ่น แก้ไขปัญหาเพื่อให้ผู้เรียนพัฒนาเต็มศักยภาพ และเป็นแบบอย่างที่ดี",
+ "ริเริ่ม คิดค้นการออกแบบการจัดการเรียนรู้ที่เน้นผู้เรียนเป็นสำคัญ แก้ไขปัญหา พัฒนาคุณภาพการเรียนรู้ สร้างแรงบันดาลใจ และเป็นแบบอย่างที่ดี",
+ "ริเริ่ม คิดค้น พัฒนานวัตกรรมกิจกรรมการเรียนรู้ที่แก้ไขปัญหาได้ ทำให้ผู้เรียนพัฒนาเต็มศักยภาพ สร้างแรงบันดาลใจ และเป็นแบบอย่างที่ดี",
+ "ริเริ่ม คิดค้น พัฒนาสื่อ นวัตกรรม เทคโนโลยี และแหล่งเรียนรู้ แก้ไขปัญหาการเรียนรู้ ทำให้ผู้เรียนสร้างนวัตกรรมได้ และเป็นแบบอย่างที่ดี",
+ "ริเริ่ม คิดค้น พัฒนารูปแบบการวัดและประเมินผลตามสภาพจริง นำผลมาแก้ไขปัญหาเพื่อพัฒนาต่อเนื่อง และเป็นแบบอย่างที่ดี",
+ "ริเริ่ม คิดค้น วิเคราะห์และสังเคราะห์เพื่อแก้ไขปัญหาหรือพัฒนาคุณภาพผู้เรียน นำผลมาใช้พัฒนาให้สูงขึ้น และเป็นแบบอย่างที่ดี",
+ "ริเริ่ม คิดค้น พัฒนาบรรยากาศที่สอดคล้องกับความแตกต่างรายบุคคล แก้ไขปัญหา สร้างแรงบันดาลใจ และเป็นแบบอย่างที่ดี",
+ "อบรมบ่มนิสัยผู้เรียน โดยริเริ่ม คิดค้น พัฒนารูปแบบที่มีประสิทธิภาพ แก้ไขปัญหาและพัฒนาผู้เรียนได้ และเป็นแบบอย่างที่ดี"],
+ d2:["ริเริ่ม คิดค้น พัฒนารูปแบบการจัดทำข้อมูลให้เป็นปัจจุบัน แก้ไขปัญหา พัฒนาคุณภาพผู้เรียน และเป็นแบบอย่างที่ดี",
+ "ใช้ข้อมูลสารสนเทศรายบุคคล ริเริ่มโครงการหรือกิจกรรมเชิงสร้างสรรค์ในการดูแลช่วยเหลือผู้เรียน และเป็นแบบอย่างที่ดี",
+ "ร่วมปฏิบัติงานทางวิชาการและงานอื่นๆ โดยพัฒนารูปแบบให้มีประสิทธิภาพสูงขึ้น และเป็นแบบอย่างที่ดี",
+ "ประสานความร่วมมือเพื่อร่วมกันแก้ไขปัญหาและพัฒนาผู้เรียน และเป็นแบบอย่างที่ดี"],
+ d3:["พัฒนาตนเองอย่างเป็นระบบและต่อเนื่อง ในด้านภาษา เทคโนโลยี และสมรรถนะวิชาชีพครู และเป็นแบบอย่างที่ดี",
+ "มีส่วนร่วมและเป็นผู้นำในการแลกเปลี่ยนเรียนรู้ทางวิชาชีพ เพื่อแก้ไขปัญหาและสร้างนวัตกรรม และเป็นแบบอย่างที่ดี",
+ "นำความรู้ ความสามารถ ทักษะที่ได้จากการพัฒนาตนเองมาใช้พัฒนาการจัดการเรียนรู้ คุณภาพผู้เรียน นวัตกรรม และเป็นแบบอย่างที่ดี"]}
+};
+
+/* ===================== ส่วนที่ 2 (20/10/10) ===================== */
+const PART2_ITEMS = [
+  {key:"method", name:"1. วิธีดำเนินการ", max:20,
+    desc:"พิจารณาจากการดำเนินการที่ถูกต้อง ครบถ้วน เป็นไปตามระยะเวลา และสะท้อนระดับการปฏิบัติที่คาดหวัง"},
+  {key:"quant", name:"2.1 ผลลัพธ์การเรียนรู้ของผู้เรียนที่คาดหวัง (เชิงปริมาณ)", max:10,
+    desc:"การบรรลุเป้าหมายเชิงปริมาณที่ครบถ้วน ถูกต้อง เชื่อถือได้"},
+  {key:"qual", name:"2.2 ผลลัพธ์การเรียนรู้ของผู้เรียนที่คาดหวัง (เชิงคุณภาพ)", max:10,
+    desc:"การบรรลุเป้าหมายเชิงคุณภาพที่ครบถ้วน ถูกต้อง เชื่อถือได้ และปรากฏผลต่อคุณภาพผู้เรียน"}
+];
+
+const STORAGE_KEY = "pa_self_kcs_v1";
+let data = loadData();
+
+function defaultData(){
+  const part1 = {};
+  Object.keys(IND_STRUCT).forEach(d=>{
+    part1[d] = IND_STRUCT[d].keys.map(name=>({name, evidence:"", level:0}));
+  });
+  const part2items = {};
+  PART2_ITEMS.forEach(it=> part2items[it.key] = 0);
+  return {
+    info:{name:"",position:"ครู",level:"none",school:"",affil:"",salary:"",
+      start:"",end:"",director:"",workload:""},
+    part1,
+    part2:{topic:"",problem:"",levels:part2items}
+  };
+}
+function loadData(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return defaultData();
+  try{ return {...defaultData(), ...JSON.parse(raw)}; }catch(e){ return defaultData(); }
+}
+let saveTimer;
+function saveData(manual){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    document.getElementById('saveStatus').textContent = "บันทึกล่าสุด: "+new Date().toLocaleTimeString('th-TH');
+  }, manual?0:400);
+  if(manual) renderSummary();
+}
+
+/* ===================== ข้อมูลทั่วไป ===================== */
+function bindInfo(){
+  const map = {i_name:'name',i_position:'position',i_school:'school',i_affil:'affil',
+    i_salary:'salary',i_start:'start',i_end:'end',i_director:'director'};
+  Object.entries(map).forEach(([id,key])=>{
+    const el = document.getElementById(id);
+    el.value = data.info[key] || "";
+    el.addEventListener('input', ()=>{ data.info[key]=el.value; saveData(); });
+  });
+  const lvSel = document.getElementById('i_level');
+  lvSel.value = data.info.level || "none";
+  lvSel.addEventListener('change', ()=>{ data.info.level = lvSel.value; saveData(); renderPart1(); });
+
+  document.getElementById('wl_yes').checked = data.info.workload==='yes';
+  document.getElementById('wl_no').checked = data.info.workload==='no';
+  document.querySelectorAll('input[name=workload]').forEach(r=>{
+    r.addEventListener('change', ()=>{
+      data.info.workload = document.querySelector('input[name=workload]:checked')?.value || "";
+      document.getElementById('workloadWarn').style.display = data.info.workload==='no'?'block':'none';
+      saveData(); renderSummary();
+    });
+  });
+  document.getElementById('workloadWarn').style.display = data.info.workload==='no'?'block':'none';
+}
+
+/* ===================== ส่วนที่ 1 ===================== */
+function renderPart1(){
+  const wrap = document.getElementById('part1Wrap');
+  const lvKey = data.info.level || "none";
+  let html = "";
+  Object.keys(IND_STRUCT).forEach(dKey=>{
+    html += `<div class="dsec">${IND_STRUCT[dKey].title}</div>`;
+    data.part1[dKey].forEach((item,i)=>{
+      const group = `${dKey}_${i}`;
+      const desc = (IND_DESC[lvKey] && IND_DESC[lvKey][dKey]) ? IND_DESC[lvKey][dKey][i] : "";
+      html += `<div class="indicator">
+        <div class="idxname"><span>${IND_STRUCT[dKey].keys[i]}</span>
+          <span class="score-badge">${item.level}/4</span></div>
+        <div class="idxdesc">${desc}</div>
+        <div class="levels">${LEVELS.map(l=>`
+          <div class="level-opt l${l.lv} ${item.level==l.lv?'sel':''}" data-group="${group}" data-lv="${l.lv}">
+            <b>ระดับ ${l.lv}</b>${l.label}
+          </div>`).join('')}
+        </div>
+        <label style="margin-top:8px">ร่องรอย/หลักฐานประกอบ</label>
+        <textarea class="ev-text" data-d="${dKey}" data-i="${i}">${item.evidence}</textarea>
+      </div>`;
+    });
+  });
+  wrap.innerHTML = html;
+  wrap.querySelectorAll('.level-opt').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const [dKey,i] = el.dataset.group.split('_');
+      data.part1[dKey][+i].level = +el.dataset.lv;
+      saveData(); renderPart1(); renderSummary();
+    });
+  });
+  wrap.querySelectorAll('.ev-text').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      data.part1[el.dataset.d][+el.dataset.i].evidence = el.value; saveData();
+    });
+  });
+}
+
+/* ===================== ส่วนที่ 2 ===================== */
+function bindPart2Text(){
+  const map = {p2_topic:'topic',p2_problem:'problem'};
+  Object.entries(map).forEach(([id,key])=>{
+    const el = document.getElementById(id);
+    el.value = data.part2[key];
+    el.addEventListener('input', ()=>{ data.part2[key]=el.value; saveData(); });
+  });
+}
+function renderPart2(){
+  const wrap = document.getElementById('part2Wrap');
+  let html = "";
+  PART2_ITEMS.forEach(it=>{
+    const lvl = data.part2.levels[it.key] || 0;
+    const score = (lvl * (it.max/4)).toFixed(1);
+    html += `<div class="indicator">
+      <div class="idxname"><span>${it.name} (เต็ม ${it.max} คะแนน)</span>
+        <span class="score-badge">${score}/${it.max}</span></div>
+      <div class="idxdesc">${it.desc}</div>
+      <div class="levels">${LEVELS.map(l=>`
+        <div class="level-opt l${l.lv} ${lvl==l.lv?'sel':''}" data-key="${it.key}" data-lv="${l.lv}">
+          <b>ระดับ ${l.lv}</b>${l.label}
+        </div>`).join('')}
+      </div>
+    </div>`;
+  });
+  wrap.innerHTML = html;
+  wrap.querySelectorAll('.level-opt').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      data.part2.levels[el.dataset.key] = +el.dataset.lv;
+      saveData(); renderPart2(); renderSummary();
+    });
+  });
+}
+
+/* ===================== คำนวณคะแนน ===================== */
+function calc(){
+  let p1 = 0;
+  Object.values(data.part1).forEach(arr=> arr.forEach(item=> p1 += item.level));
+  let p2 = 0;
+  PART2_ITEMS.forEach(it=> p2 += (data.part2.levels[it.key]||0) * (it.max/4));
+  const total = p1 + p2;
+  const need1 = 60*0.70, need2 = 40*0.70;
+  const pass1 = p1 >= need1, pass2 = p2 >= need2;
+  const workloadOk = data.info.workload === 'yes';
+  const finalPass = pass1 && pass2 && workloadOk;
+  return {p1,p2,total,pass1,pass2,workloadOk,finalPass,need1,need2};
+}
+
+/* ===================== สรุปผล ===================== */
+function renderSummary(){
+  const r = calc();
+  document.getElementById('summaryCards').innerHTML = `
+    <div class="summary-item"><div class="num">${r.p1}/60</div>ส่วนที่ 1</div>
+    <div class="summary-item"><div class="num">${r.p2.toFixed(1)}/40</div>ส่วนที่ 2</div>
+    <div class="summary-item"><div class="num">${r.total.toFixed(1)}/100</div>รวม</div>`;
+  document.getElementById('summaryTableWrap').innerHTML = `
+    <table class="sum"><thead><tr><th>การประเมินข้อตกลงในการพัฒนางาน</th><th>คะแนนเต็ม</th><th>คะแนนประเมินตนเอง</th><th>เกณฑ์ผ่าน (ร้อยละ 70)</th><th>ผล</th></tr></thead>
+    <tbody>
+      <tr><td>ส่วนที่ 1 ข้อตกลงตามมาตรฐานตำแหน่ง</td><td>60</td><td>${r.p1}</td><td>≥ ${r.need1}</td>
+        <td class="${r.pass1?'pass':'fail'}">${r.pass1?'ผ่าน':'ไม่ผ่าน'}</td></tr>
+      <tr><td>ส่วนที่ 2 ประเด็นท้าทาย</td><td>40</td><td>${r.p2.toFixed(1)}</td><td>≥ ${r.need2}</td>
+        <td class="${r.pass2?'pass':'fail'}">${r.pass2?'ผ่าน':'ไม่ผ่าน'}</td></tr>
+      <tr style="font-weight:700"><td>รวม</td><td>100</td><td>${r.total.toFixed(1)}</td><td>-</td>
+        <td class="${(r.pass1&&r.pass2)?'pass':'fail'}">${(r.pass1&&r.pass2)?'ผ่าน':'ไม่ผ่าน'}</td></tr>
+      <tr><td colspan="4">ภาระงาน</td>
+        <td class="${r.workloadOk?'pass':'fail'}">${data.info.workload? (r.workloadOk?'เป็นไปตามเกณฑ์':'ไม่เป็นไปตามเกณฑ์') : 'ยังไม่ระบุ'}</td></tr>
+    </tbody></table>`;
+  document.getElementById('resultText').innerHTML =
+    `<b>สรุปผลการประเมินตนเองภาพรวม:</b> <span class="${r.finalPass?'pass':'fail'}">${r.finalPass?'ผ่านเกณฑ์การประเมิน':'ไม่ผ่านเกณฑ์การประเมิน'}</span>
+     <p class="small">*เกณฑ์ผ่าน: คะแนนแต่ละส่วนต้องไม่ต่ำกว่าร้อยละ 70 และภาระงานต้องเป็นไปตามที่ ก.ค.ศ. กำหนด ผลนี้เป็นเพียงการประเมินตนเองเบื้องต้น ผลจริงขึ้นอยู่กับดุลยพินิจของคณะกรรมการประเมิน 3 ท่าน</p>`;
+}
+
+/* ===================== Tabs ===================== */
+document.querySelectorAll('nav button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    ['info','part1','part2','summary'].forEach(t=>{
+      document.getElementById('tab-'+t).style.display = (t===btn.dataset.tab)?'block':'none';
+    });
+    if(btn.dataset.tab==='summary') renderSummary();
+  });
+});
+
+/* ===================== Export / Import ===================== */
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `PA_SelfAssess_${data.info.name||'data'}.json`;
+  a.click();
+}
+function importJSON(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    try{
+      data = {...defaultData(), ...JSON.parse(ev.target.result)};
+      saveData(true);
+      bindInfo(); renderPart1(); bindPart2Text(); renderPart2(); renderSummary();
+      alert('นำเข้าข้อมูลสำเร็จ');
+    }catch(err){ alert('ไฟล์ไม่ถูกต้อง'); }
+  };
+  reader.readAsText(file);
+}
+
+/* ===================== พิมพ์เอกสาร ===================== */
+function levelLabel(lv){ const l=LEVELS.find(x=>x.lv===lv); return l? `ระดับ ${lv} (${l.label})` : '-'; }
+
+function printForm(type){
+  const r = calc();
+  const inf = data.info;
+  const levelTitle = {none:"ไม่มีวิทยฐานะ",cs2:"คศ.2 (ชำนาญการ)",cs3:"คศ.3 (ชำนาญการพิเศษ)"}[inf.level];
+  let html = "";
+
+  if(type==='pa2'){
+    /* หน้าที่ 1: ข้อมูลทั่วไป + ส่วนที่ 1 */
+    html += `<div class="avoid-break">
+      <h2 style="text-align:center">แบบประเมินผลการพัฒนางานตามข้อตกลง (PA2/ส) — ประเมินตนเอง</h2>
+      <p>ชื่อ-สกุล: ${inf.name} &nbsp; ตำแหน่ง: ${inf.position} &nbsp; วิทยฐานะที่ขอ: ${levelTitle}</p>
+      <p>สถานศึกษา: ${inf.school} &nbsp; สังกัด: ${inf.affil} &nbsp; อันดับเงินเดือน: ${inf.salary||'-'}</p>
+      <p>ภาระงาน: ${inf.workload==='yes'?'เป็นไปตามที่ ก.ค.ศ. กำหนด':(inf.workload==='no'?'ไม่เป็นไปตามที่ ก.ค.ศ. กำหนด':'ยังไม่ระบุ')}</p>
+    </div>`;
+
+    html += `<h3>ส่วนที่ 1 มาตรฐานตำแหน่ง (60 คะแนน) — ประเมินตนเองได้ ${r.p1} คะแนน</h3>
+    <table><tr><th>ตัวชี้วัด</th><th>ระดับที่ประเมินตนเอง</th><th>คะแนน</th></tr>`;
+    Object.keys(IND_STRUCT).forEach(dKey=>{
+      html += `<tr><td colspan="3"><b>${IND_STRUCT[dKey].title}</b></td></tr>`;
+      data.part1[dKey].forEach((item,i)=>{
+        html += `<tr><td>${IND_STRUCT[dKey].keys[i]}</td>
+          <td style="text-align:center">${item.level? levelLabel(item.level) : '-'}</td>
+          <td style="text-align:center">${item.level}</td></tr>`;
+      });
+    });
+    html += `</table>`;
+
+    /* หน้าใหม่เสมอ: ส่วนที่ 2 ประเด็นท้าทาย */
+    html += `<div class="page-break">
+      <h3>ส่วนที่ 2 ประเด็นท้าทาย (40 คะแนน) — ประเมินตนเองได้ ${r.p2.toFixed(1)} คะแนน</h3>
+      <p><b>ประเด็น:</b> ${data.part2.topic}</p>
+      <p><b>สภาพปัญหา:</b> ${data.part2.problem}</p>
+      <table><tr><th>หัวข้อประเมิน</th><th>ระดับ</th><th>คะแนน</th></tr>
+      ${PART2_ITEMS.map(it=>{
+        const lv = data.part2.levels[it.key]||0;
+        return `<tr><td>${it.name}</td><td style="text-align:center">${lv? levelLabel(lv):'-'}</td>
+          <td style="text-align:center">${(lv*(it.max/4)).toFixed(1)}/${it.max}</td></tr>`;
+      }).join('')}
+      </table>
+      <br><br>
+      <p>ลงชื่อ..............................................ผู้ประเมินตนเอง<br>(${inf.name||''})</p>
+      <p>ลงชื่อ..............................................ผู้บังคับบัญชา/ผู้อำนวยการรับทราบ<br>(${inf.director||''})</p>
+    </div>`;
+
+  } else {
+    html += `<h2 style="text-align:center">แบบสรุปผลการประเมินการพัฒนางานตามข้อตกลง (PA3/ส)</h2>
+    <p>ชื่อ-สกุล: ${inf.name} &nbsp; ตำแหน่ง: ${inf.position} &nbsp; วิทยฐานะที่ขอ: ${levelTitle}</p>
+    <p>สถานศึกษา: ${inf.school} &nbsp; สังกัด: ${inf.affil} &nbsp; รอบประเมิน: ${inf.start} ถึง ${inf.end}</p>`;
+    html += document.getElementById('summaryTableWrap').innerHTML;
+    html += `<p style="font-size:16px;margin-top:10px"><b>สรุปผล:</b> ${r.finalPass?'ผ่านเกณฑ์การประเมิน':'ไม่ผ่านเกณฑ์การประเมิน'}</p>
+    <br><p>ลงชื่อ..............................................ผู้ประเมินตนเอง<br>(${inf.name||''})</p>
+    <p>ลงชื่อ..............................................ผู้บังคับบัญชา/ผู้อำนวยการรับทราบ<br>(${inf.director||''})</p>`;
+  }
+  document.getElementById('printArea').innerHTML = html;
+  setTimeout(()=>window.print(), 100);
+}
+
+/* ===================== Init ===================== */
+bindInfo();
+renderPart1();
+bindPart2Text();
+renderPart2();
+renderSummary();
+</script>
+</body>
+</html>
